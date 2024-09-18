@@ -1,7 +1,8 @@
 # Source code for 3D bat reconstruction pipeline
   Here is the repo contains all the source code for our work "A Model-Based Deep-Learning Approach to Reconstructing the Highly Articulated Flight Kinematics of Bats". There are three major conponents, soft rasterization, LBS model, and Blender post-processing. 
 
-## Soft rasterization
+## Soft rasterization![Screenshot 2024-09-15 231547](https://github.com/user-attachments/assets/ba8dc38a-d8be-4d3f-a1d1-05fb0271dec7)
+
 Our pipeline is based on Soft rasterization and need to be setup using: https://github.com/ShichenLiu/SoftRas and under "model" folder, there are a few scripts used for kinematic reconstruction and visualization.
 
      scale_model.py is used for reconstructing kinematic using silhouette image and manually designed template
