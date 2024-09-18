@@ -1,0 +1,14 @@
+# Blender MTL File: 'softRas.blend'
+# Material Count: 1
+
+newmtl M_Bat.009
+Ns 10.000002
+Ka 1.000000 1.000000 1.000000
+Kd 0.588000 0.588000 0.588000
+Ks 0.000000 0.000000 0.000000
+Ke 0.000000 0.000000 0.000000
+Ni 1.000000
+d 1.000000
+illum 1
+map_Kd G:\\GCN_project\\Bat_Sample_Model\\newbat.fbm\\T_bat_d.png
+map_Ks G:\\GCN_project\\Bat_Sample_Model\\newbat.fbm\\T_bat_s.png
