@@ -1,0 +1,134 @@
+import bpy
+from bpy import context
+
+import json
+import mathutils
+from mathutils import Vector, Matrix
+import math
+import numpy as np
+def read_yaml_file(file_path): 
+    with open(file_path) as f: 
+        pose_dict = json.load(f)
+        
+    for key in pose_dict.keys(): 
+        print(key)
+    return pose_dict
+
+
+# Define the target vector
+
+
+# Get the armature object by object name
+
+
+def rodrigues(pose): 
+    l1norm = np.linalg.norm(pose + [1e-8, 1e-8, 1e-8])
+    angle = l1norm
+    normalized = pose / l1norm
+    angle = angle * 0.5
+    v_cos = np.cos(angle)
+    v_sin = np.sin(angle)
+    
+    quat = [v_cos, v_sin * normalized[0], v_sin * normalized[1], v_sin * normalized[2] ]
+    
+    return quat
+
+def quat_to_rotmat(quat):
+    """Convert quaternion coefficients to rotation matrix.
+    Args:
+        quat: size = [B, 4] 4 <===>(w, x, y, z)
+    Returns:
+        Rotation matrix corresponding to the quaternion -- size = [B, 3, 3]
+    """ 
+    norm_quat = quat
+    norm_quat = norm_quat/np.linalg.norm(norm_quat)
+    w, x, y, z = norm_quat[0], norm_quat[1], norm_quat[2], norm_quat[3]
+
+    w2, x2, y2, z2 = w**2, x**2, y**2, z**2
+    wx, wy, wz = w*x, w*y, w*z
+    xy, xz, yz = x*y, x*z, y*z
+
+    rotMat = np.array([[w2 + x2 - y2 - z2, 2*xy - 2*wz, 2*wy + 2*xz],
+              [2*wz + 2*xy, w2 - x2 + y2 - z2, 2*yz - 2*wx],
+              [2*xz - 2*wy, 2*wx + 2*yz, w2 - x2 - y2 + z2]])
+    return (rotMat)        
+
+start = 500
+end = 1400
+
+for file_index in range(start,end+1): 
+        #print(file_index)
+    #if file_index == 1:
+    json_file_path = f"D:/PhDProject_real_data/brunei_2023_bat_test_13_1/rearrange_pose/{file_index}/output.json"
+    pose_dict = read_yaml_file(json_file_path)
+    #template_displacement = [math.floor(pose_dict['template_displacement'][0]*1e4)/1e4, math.ceil(pose_dict['template_displacement'][1]*1e4)/1e4,math.ceil(pose_dict['template_displacement'][2]*1e4)/1e4]
+    print(pose_dict['template_displacement'])
+  
+  
+    template_displacement = Vector(pose_dict['template_displacement']) 
+ 
+    print(template_displacement)
+    scale = 0.005
+
+    pose_array = pose_dict['pose'] 
+
+    # Get the active bone. If you want to operator on a specific bone, use it's name instead. arm.pose.bones['Bone']
+    bones = context.selected_objects[0].pose.bones
+   
+    for bone_index in range(1, 34): 
+        
+        #print(bone.name)
+        # Get the components of the matrix of the bone. matrix is in the armature object space. matrix_basis is relative to the parent. decompose() returns the location, rotation, and scale from the matrix.
+        bone = bones[bone_index]
+        
+        print(bone.children)
+        l, r, s = (bone.matrix).decompose()
+        print(bones[5].matrix)
+        pose_array[bone_index] = pose_array[bone_index]
+        pose_array[bone_index][1], pose_array[bone_index][2] = pose_array[bone_index][1], pose_array[bone_index][2]
+        pose_array[bone_index] =  pose_array[bone_index]
+        quat = rodrigues(pose_array[bone_index])
+        mat = quat_to_rotmat(quat) 
+        eu = Matrix(mat)
+        
+       
+
+        final_rotation = eu @ r.to_matrix() 
+        
+
+        #print(l+Vector(template_displacement)*285)
+        joints = np.array(pose_dict['joints'][0]) 
+       
+        
+        joint = Vector(joints[bone_index])
+        mat = mathutils.Matrix.LocRotScale(None, final_rotation, None)
+        
+        bone.matrix  = mat
+        
+        #bone.keyframe_insert(data_path="location", frame=file_index)     
+        bone.keyframe_insert(data_path="rotation_quaternion", frame=file_index)
+        #bones = context.selected_objects[0].pose.bones
+   
+        
+           
+    bone = context.selected_objects[0].pose.bones[0]
+    l, r, s = (bone.id_data.matrix_world @ bone.matrix).decompose()
+    pose_array[0][0],pose_array[0][1], pose_array[0][2] = pose_array[0][0],pose_array[0][1], pose_array[0][2]
+    quat = rodrigues(pose_array[0])
+    rot_matrix = quat_to_rotmat(quat)
+    eu = Matrix(rot_matrix)
+            
+             
+    final_rotation =  eu @ r.to_matrix() 
+        
+    joints = np.array(pose_dict['joints'][0])
+        
+    joint = Vector(joints[0])
+    mat = mathutils.Matrix.LocRotScale((joint)*1/scale,final_rotation, None)
+        
+    #bone.matrix  = mat
+  
+    #bone.keyframe_insert(data_path="location", frame=file_index)     
+    #bone.keyframe_insert(data_path="rotation_quaternion", frame=file_index)
+    
+    

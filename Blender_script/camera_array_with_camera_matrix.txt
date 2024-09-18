@@ -1,0 +1,26 @@
+import bpy
+import numpy as np
+
+root = "\\camera_location.txt"
+
+
+location = np.loadtxt(root)
+
+
+print(location.shape)
+scn = bpy.context.scene
+
+
+
+for camera in range(location.shape[1]):
+    cam1 = bpy.data.cameras.new("Camera".format(camera))
+    cam1.lens = 1
+    cam1.display_size = 0.01
+    cam_obj1 = bpy.data.objects.new("Camera".format(camera), cam1)
+    
+    xyz = (location[0][camera], location[1][camera], location[2][camera])
+    cam_obj1.location = xyz
+    cam_obj1.rotation_euler = (0, 0, 0)
+    scn.collection.objects.link(cam_obj1)
+
+# create the first camera
